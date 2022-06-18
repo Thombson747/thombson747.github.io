@@ -1,0 +1,87 @@
+#SARAL/AltiKa Sea Ice Concentration (SIC) estimation
+
+
+
+#Importing the necessary libraries
+import numpy as np
+from osgeo import gdal
+import math
+import pandas as pd
+from scipy import ndimage
+import matplotlib.pyplot as plt
+import geopandas as gpd
+from matplotlib_scalebar.scalebar import ScaleBar
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+#Importing the Brightness temperature (Tb) of SARAL/AltiKa (SRL) 
+dfo = pd.read_fwf(r"Path to SRL Tb for open water")
+dfa = pd.read_fwf(r"Path to SRL Tb for First year (FY) ice")
+dfd = pd.read_fwf(r"Path to SRL Tb for Multi year (MY) ice")
+
+#Tie points
+o1 = dfo.Tb_Ka.mean() #Tb_Ka of open water tie point
+o2 = dfo.Tb_K.mean() #Tb_K of open water tie point
+a1 = dfa.Tb_Ka.mean() #Tb_Ka of New ice tie point
+a2 = dfa.Tb_K.mean() #Tb_K of New ice tie point
+d1 = dfd.Tb_Ka.mean()-2*dfd.Tb_Ka.std() #Tb_Ka of MY ice tie point
+d2 = dfd.Tb_K.mean()-2*dfd.Tb_K.std() #Tb_K of MY ice tie point
+
+ds = gdal.Open(r"Path to SRL Tb without Mask")
+gt = ds.GetGeoTransform ()
+proj = ds.GetProjection()
+
+band1 = ds.GetRasterBand(2)
+array1 = band1.ReadAsArray()
+
+band2 = ds.GetRasterBand(3)
+array2 = band2.ReadAsArray()
+
+#SARAL/AltiKa Sea Ice Algorithm (SSIA)
+#SSIA is disclosed to the public for patent issue.
+def oad (o1,o2,a1,a2,d1,d2,i1,i2): #Beginning of the SSIA
+---------------------------------------------------------
+    
+#Taking the values of Tb_ka and Tb_k of SRL    
+com = np.array([])   
+for row in range (len(array1[:,0])):
+    for col in range (len(array1[0,:])):
+        com = np.append (com, oad(o1,o2,a1,a2,d1,d2,array1[row,col],array2[row,col]))
+
+
+#Creating 2D array
+comb = com.reshape (len(array1[:,0]),len(array1[0,:]))
+
+#Median Filter
+srl_med = ndimage.median_filter(comb, 3)
+
+#Applying Buffer MASK with Pole Hole
+dsmk = gdal.Open(r"Path to Land Mask")
+bm1 = dsmk.GetRasterBand(1)
+am1 = bm1.ReadAsArray()
+am2 = np.where (am1 > 0,am1,np.nan)
+mask_array = np.ma.array (am2, mask=np.isnan(am2))
+srl_masked = srl_med*mask_array
+
+#Removing Spurious ice
+dsmk2 = gdal.Open(r"Path to Mask")
+bm2 = dsmk2.GetRasterBand(1)
+am2 = bm2.ReadAsArray()
+srl_spurious_masked = srl_masked*am2
+
+#Displaying Final SRL SIC
+cmmap = plt.cm.jet
+cmmap.set_bad('coral',1.)
+fig, ax = plt.subplots()
+divider = make_axes_locatable(ax)
+cax = divider.append_axes('right', size='5%', pad=0.05)
+
+im = ax.imshow(srl_spurious_masked, cmap='jet')
+
+fig.colorbar(im, cax=cax, orientation='vertical', label='Ice concentration (%)')
+
+ax.axes.xaxis.set_visible(False)
+ax.axes.yaxis.set_visible(False)
+plt.gcf().set_size_inches(15, 15)
+ax.set_title('SARAL SIC December, 2013 Arctic Grid 25 km', fontsize=20)
+fig.set_dpi(300.0)
+plt.show()
