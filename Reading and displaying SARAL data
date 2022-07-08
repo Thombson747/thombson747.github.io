@@ -1,0 +1,38 @@
+import matplotlib.pyplot as plt
+from netCDF4 import Dataset
+import numpy as np
+
+data = Dataset(r'path\to\file')
+
+#Reading the viariables
+lats = data.variables['lat'][:]
+lons = data.variables['lon'][:]
+tbka = data.variables['tb_ka'][:]
+tbk = data.variables['tb_k'][:]
+
+#Rotating the matric by 90 degrees counter-clockwise
+Ka = np.rot90(tbka, k=1, axes=(0, 1))
+K = np.rot90(tbk, k=1, axes=(0, 1))
+
+#PLotting Tb_Ka and Tb_K
+fig, (ax1, ax2) = plt.subplots(2, sharex=True)
+cmmap = plt.cm.jet
+cmmap.set_bad('dimgrey',1.)
+
+cbar_ax = fig.add_axes([0.89, 0.15, 0.03, 0.7])
+
+im = ax1.imshow(Ka, cmap='jet')
+im = ax2.imshow(K, cmap='jet')
+
+fig.colorbar(im, cax=cbar_ax, orientation='vertical', label='Brightness Temperature (K)')
+
+ax1.axes.xaxis.set_visible(False)
+ax1.axes.yaxis.set_visible(False)
+ax2.axes.xaxis.set_visible(False)
+ax2.axes.yaxis.set_visible(False)
+plt.gcf().set_size_inches(15, 15)
+ax1.set_title('SARAL Tb_Ka', fontsize=20)
+ax2.set_title('SARAL Tb_K', fontsize=20)
+fig.set_dpi(100.0)
+plt.show()
+
