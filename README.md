@@ -1,10 +1,5 @@
-# Algorithm for Sea Ice Concentration (SIC)
-Sea Ice Concentration (SIC) Estimation at the Arctic using SARAL/AltiKa (SRL) brightness temperature (Tb) dual-frequency (23.8 GHz and 37 GHz) data at a grid resolution of 25 km. The Algorithm accurately generates SIC as can be seen below. This is a projrct funded by the Indian Space Research Organisation (ISRO).
+On 25 February 2013, India and France jointly launched an oceanographic satellite mission called ‘Satellite with Advanced Research and Global Observation Satellite (Argos) and Ka-band Altimeter (ALtiKa)(SARAL/AltiKa). SARAL (SRL) carries a Radar Altimeter operating at Ka-band (35.75 GHz) for measuring the dynamic ocean surface topography. Besides an altimeter, SARAL carries onboard a dual frequency (23.8 and 37 GHz) nadir-looking Passive Microwave Radiometer (PMR), and an ‘Advanced Research and Global Observation Satellite-3’ (ARGOS-3) data collection system.
 
-#SRL Tb visualization using Python. For more details, refer	https://medium.com/@ch.thombson18
+SRL brightness temperature (Tb) visualization using Python code is in the repository. For more details, please refer	https://medium.com/@ch.thombson18
 
-
-
-
-
-#
+Sea Ice Concentration (SIC) Estimation at the Arctic using SARAL/AltiKa (SRL) brightness temperature (Tb) dual-frequency (23.8 GHz and 37 GHz) data at a grid resolution of 25 km. The Algorithm accurately generates SIC as can be seen below and is given in the repository. This is a project funded by the Indian Space Research Organisation (ISRO).
